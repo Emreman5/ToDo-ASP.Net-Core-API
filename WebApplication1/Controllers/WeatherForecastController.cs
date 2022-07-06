@@ -2,38 +2,40 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
+using WebApplication1;
+
+
+
 
 namespace WebApplication1.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+    public class ToDoController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
+        private IMongoCollection<User> _collection;
+        public ToDoController(IMongoClient client)
         {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
-
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
-        {
-            _logger = logger;
+            var database = client.GetDatabase("todo");
+            _collection = database.GetCollection<User>("users");
         }
-
+        
         [HttpGet]
-        public IEnumerable<WeatherForecast> Get()
+        public IEnumerable<User> Get()
         {
-            var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-                {
-                    Date = DateTime.Now.AddDays(index),
-                    TemperatureC = rng.Next(-20, 55),
-                    Summary = Summaries[rng.Next(Summaries.Length)]
-                })
-                .ToArray();
+            return _collection.Find(s => true).ToList();
         }
+
+        [HttpPost]
+        public void Post([FromBody] User user)
+        {
+            _collection.InsertOne(user);
+        }
+        
+        
     }
 }
