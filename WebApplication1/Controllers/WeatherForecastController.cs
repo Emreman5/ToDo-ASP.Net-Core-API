@@ -24,7 +24,7 @@ namespace WebApplication1.Controllers
             _collection = database.GetCollection<User>("users");
         }
         
-        [HttpGet("manga")]
+        [HttpGet]
         public IEnumerable<User> Get()
         {
             return _collection.Find(s => true).ToList();
